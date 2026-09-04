@@ -25014,3 +25014,96 @@ th {
 
 
 .money-row-actions,.income-row-actions{display:flex;align-items:center;gap:6px;white-space:nowrap}.money-action-btn,.income-action-btn{width:31px;height:31px;border:1px solid #e5e7eb;background:#fff;border-radius:8px;display:grid;place-items:center;cursor:pointer}.money-action-btn.edit,.income-action-btn.edit{color:#2563eb}.money-action-btn.delete,.income-action-btn.delete{color:#dc2626}.money-action-btn:disabled,.income-action-btn:disabled{opacity:.45;cursor:not-allowed}.income-system-label{font-size:10px;font-weight:800;color:#98a2b3}.money-modal-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(15,23,42,.42);display:grid;place-items:center;padding:20px}.money-edit-modal{width:min(680px,100%);background:#fff;border-radius:18px;box-shadow:0 24px 70px rgba(15,23,42,.22);overflow:hidden}.money-edit-head{display:flex;justify-content:space-between;gap:16px;padding:18px 20px;border-bottom:1px solid #eef0f2}.money-edit-head span{font-size:10px;font-weight:900;letter-spacing:.12em;color:#98a2b3}.money-edit-head h2{margin:4px 0 3px;font-size:20px}.money-edit-head p{margin:0;font-size:11px;color:#98a2b3}.money-edit-close{border:0;background:#f3f4f6;border-radius:9px;width:34px;height:34px;font-size:22px;cursor:pointer;color:#667085}.money-edit-form{padding:20px}.money-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.money-edit-grid label{display:flex;flex-direction:column;gap:6px}.money-edit-grid span{font-size:11px;font-weight:800;color:#475467}.money-edit-grid input,.money-edit-grid select{height:42px;border:1px solid #dfe3e8;border-radius:10px;padding:0 11px;outline:none;background:#fff}.money-edit-grid input:focus,.money-edit-grid select:focus{border-color:#111827}.money-edit-full{grid-column:1/-1}.money-edit-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.money-edit-actions button{height:40px;padding:0 14px;border-radius:10px;border:1px solid #e3e7eb;font-weight:800;cursor:pointer}.money-edit-actions .secondary{background:#fff;color:#475467}.money-edit-actions .primary{background:#111827;color:#fff;border-color:#111827}@media(max-width:640px){.money-edit-grid{grid-template-columns:1fr}.money-edit-full{grid-column:auto}.money-modal-backdrop{padding:10px}.money-edit-modal{border-radius:14px}.money-edit-form{padding:15px}}
+/* =========================================================
+   KAS — FIX COLUMN OVERFLOW / RESPONSIVE
+   Override khusus tanpa mengubah CSS lama
+   ========================================================= */
+
+.kas-member-main{
+  width:100%;
+  min-width:0;
+  display:grid;
+  grid-template-columns:
+    42px
+    minmax(0,1fr)
+    56px
+    82px
+    96px
+    92px
+    22px;
+  align-items:center;
+  gap:8px;
+  min-height:78px;
+  padding:10px 13px;
+  border:0;
+  background:#fff;
+  text-align:left;
+  cursor:pointer;
+  transition:background .16s ease;
+}
+
+.kas-member-info,
+.kas-member-stat,
+.kas-member-amount,
+.kas-member-date{
+  min-width:0;
+  overflow:hidden;
+}
+
+.kas-member-info strong,
+.kas-member-info span,
+.kas-member-date strong{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.kas-member-main > svg{
+  width:17px;
+  min-width:17px;
+  flex:0 0 17px;
+}
+
+/* Tablet */
+@media (max-width:1100px){
+  .kas-member-main{
+    grid-template-columns:
+      42px
+      minmax(0,1fr)
+      50px
+      72px
+      88px
+      84px
+      22px;
+    gap:7px;
+  }
+}
+
+/* Tablet kecil */
+@media (max-width:850px){
+  .kas-member-main{
+    grid-template-columns:
+      42px
+      minmax(0,1fr)
+      22px;
+    gap:9px;
+  }
+
+  .kas-member-stat,
+  .kas-member-amount,
+  .kas-member-date{
+    display:none;
+  }
+}
+
+/* Mobile */
+@media (max-width:600px){
+  .kas-member-main{
+    grid-template-columns:
+      42px
+      minmax(0,1fr)
+      22px;
+    gap:8px;
+    padding:10px 11px;
+  }
+}
