@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   ArrowDownLeft,
   ArrowRight,
@@ -470,28 +471,33 @@ export default function PublicDashboard() {
   return (
     <div className="public-v3-page">
       <header className="public-v3-topbar">
-     <a
-  href="/"
+     <Link
+  to="/"
   className="public-v3-brand"
   aria-label="PMR SMANEL"
 >
   <img
-    src="/logo-pmr-smanel.png"
+    src={`${import.meta.env.BASE_URL}logo-pmr-smanel.png`}
     alt="Logo PMR SMANEL"
     className="public-v3-brand-logo"
+    onError={(event) => {
+      event.currentTarget.style.display = 'none';
+      event.currentTarget.nextElementSibling?.classList.add('is-visible');
+    }}
   />
+  <span className="public-v3-brand-fallback" aria-hidden="true">PMR</span>
 
   <div className="public-v3-brand-text">
     <strong>PMR SMANEL</strong>
     <span>PALANG MERAH REMAJA</span>
   </div>
-</a>
+</Link>
 
-        <a href="/login" className="public-v3-login">
+        <Link to="/login" className="public-v3-login">
           <LockKeyhole size={15} />
           Login Pengurus
           <ArrowRight size={15} />
-        </a>
+        </Link>
       </header>
 
       <main>
@@ -535,51 +541,62 @@ export default function PublicDashboard() {
           </div>
 
           <div className="public-v3-hero-art" aria-hidden="true">
-            <div className="public-v3-art-glow glow-one" />
-            <div className="public-v3-art-glow glow-two" />
-            <div className="public-v3-character">
-              <div className="public-v3-head">
-                <div className="hair" />
-                <div className="eye eye-left" />
-                <div className="eye eye-right" />
-                <div className="smile" />
+            <div className="public-v4-orbit orbit-one" />
+            <div className="public-v4-orbit orbit-two" />
+
+            <div className="public-v4-board">
+              <div className="public-v4-board-head">
+                <div>
+                  <span>PMR SMANEL</span>
+                  <strong>Transparency Overview</strong>
+                </div>
+                <span className="public-v4-live-dot">LIVE</span>
               </div>
 
-              <div className="public-v3-body">
-                <div className="collar left" />
-                <div className="collar right" />
-                <div className="vest">
-                  <span>+</span>
-                  <b>PMR</b>
-                </div>
+              <div className="public-v4-board-balance">
+                <span>Saldo organisasi</span>
+                <strong>{rupiah(Number(kas.saldo || 0) + Number(denda.saldo || 0))}</strong>
+                <small>Kas + Denda tercatat</small>
               </div>
 
-              <div className="public-v3-arm arm-left" />
-              <div className="public-v3-arm arm-right" />
-
-              <div className="public-v3-laptop">
-                <div className="screen">
-                  <div className="screen-top" />
-                  <div className="screen-lines">
-                    <i />
-                    <i />
-                    <i />
-                  </div>
+              <div className="public-v4-board-grid">
+                <div className="public-v4-mini-card">
+                  <Wallet size={16} />
+                  <span>Kas</span>
+                  <strong>{rupiah(kas.saldo)}</strong>
                 </div>
-                <div className="base" />
+                <div className="public-v4-mini-card">
+                  <Users size={16} />
+                  <span>Anggota</span>
+                  <strong>{data.anggotaAktif || 0}</strong>
+                </div>
+                <div className="public-v4-mini-card">
+                  <BarChart3 size={16} />
+                  <span>Pemasukan</span>
+                  <strong>{rupiah(data.totalPemasukan)}</strong>
+                </div>
+                <div className="public-v4-mini-card">
+                  <ShieldCheck size={16} />
+                  <span>Piutang</span>
+                  <strong>{rupiah(Number(data.tunggakanKas?.total || 0) + Number(data.tunggakanDenda?.total || 0))}</strong>
+                </div>
               </div>
             </div>
 
-            <div className="public-v3-plant plant-left">
-              <span />
-              <span />
-              <b />
+            <div className="public-v4-float-card float-top">
+              <CheckCircle2 size={15} />
+              <div>
+                <span>Kehadiran terakhir</span>
+                <strong>{attendance.hadir || 0} hadir</strong>
+              </div>
             </div>
 
-            <div className="public-v3-plant plant-right">
-              <span />
-              <span />
-              <b />
+            <div className="public-v4-float-card float-bottom">
+              <LockKeyhole size={14} />
+              <div>
+                <span>Data publik</span>
+                <strong>Terverifikasi</strong>
+              </div>
             </div>
           </div>
         </section>
