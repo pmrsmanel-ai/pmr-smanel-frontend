@@ -50,6 +50,7 @@ import AnggotaPage from './pages/AnggotaPage';
 import PemasukanPage from './pages/PemasukanPage';
 import PengeluaranPage from './pages/PengeluaranPage';
 import RiwayatAbsensiPage from './pages/RiwayatAbsensiPage';
+import PublicDashboard from './pages/PublicDashboard';
 
 
 // ======================================================
@@ -233,9 +234,9 @@ if (
           <div className="brand-logo-box">
 
             <img
-              src="/logo-pmr-smanel.png"
-              alt="Logo PMR SMANEL"
-              className="brand-logo"
+  src={`${import.meta.env.BASE_URL}logo-pmr-smanel.jpg`}
+  alt="Logo PMR SMANEL"
+  className="login-logo-image"
               onError={(event) => {
                 event.currentTarget.style.display =
                   'none';
@@ -477,9 +478,9 @@ function Login() {
         <div className="login-logo-wrap">
 
           <img
-            src="/logo-pmr-smanel.png"
-            alt="Logo PMR SMANEL"
-            className="login-logo-image"
+  src={`${import.meta.env.BASE_URL}logo-pmr-smanel.png`}
+  alt="Logo PMR SMANEL"
+  className="login-logo-image"
             onError={(event) => {
 
               event.currentTarget.style.display =
@@ -4032,15 +4033,10 @@ export default function App() {
       />
 
 
-      <Route
-        path="/"
-        element={
-          <Navigate
-            to="/dashboard"
-            replace
-          />
-        }
-      />
+     <Route
+  path="/"
+  element={<PublicDashboard />}
+/>
 
 
       <Route
