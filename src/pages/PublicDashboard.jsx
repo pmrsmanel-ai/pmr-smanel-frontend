@@ -12,11 +12,14 @@ import {
   FileSearch,
   FileText,
   Heart,
+  Info,
   LockKeyhole,
   Search,
   ShieldCheck,
   Sparkles,
+  TrendingDown,
   TrendingUp,
+  UserRound,
   Users,
   Wallet,
   X,
@@ -38,10 +41,8 @@ function normalize(value) {
 
 function formatDate(value) {
   if (!value) return '-';
-
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return String(value);
-
   return new Intl.DateTimeFormat('id-ID', {
     day: '2-digit',
     month: 'short',
@@ -51,10 +52,8 @@ function formatDate(value) {
 
 function formatLongDate(value) {
   if (!value) return '-';
-
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return String(value);
-
   return new Intl.DateTimeFormat('id-ID', {
     weekday: 'long',
     day: 'numeric',
@@ -63,283 +62,125 @@ function formatLongDate(value) {
   }).format(d);
 }
 
-function MetricCard({
-  icon: Icon,
-  title,
-  value,
-  tone,
-  clickable,
-  onClick,
-}) {
+function MetricCard({ icon: Icon, title, value, caption, tone = 'red', onClick }) {
+  const clickable = Boolean(onClick);
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={!clickable}
-      className={`public-v3-metric ${tone} ${clickable ? 'clickable' : ''}`}
+      className={`public-v9-kpi public-v9-${tone} ${clickable ? 'is-clickable' : ''}`}
     >
-      <div className="public-v3-metric-icon">
-        <Icon size={19} />
-      </div>
-
-      <div className="public-v3-metric-copy">
+      <div className="public-v9-kpi-icon"><Icon size={20} /></div>
+      <div className="public-v9-kpi-copy">
         <span>{title}</span>
         <strong>{value}</strong>
+        {caption && <small>{caption}</small>}
       </div>
-
-      {clickable && (
-        <ChevronRight
-          size={16}
-          className="public-v3-metric-arrow"
-        />
-      )}
+      {clickable && <ChevronRight size={17} className="public-v9-kpi-arrow" />}
     </button>
   );
 }
 
-function AttendanceCard({
-  label,
-  value,
-  tone,
-  onClick,
-}) {
-  const Icon =
-    tone === 'green'
-      ? CheckCircle2
-      : tone === 'red'
-        ? Heart
-        : tone === 'orange'
-          ? Sparkles
-          : Users;
-
+function FeatureCard({ icon: Icon, title, description, to, tone, action }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`public-v3-attendance ${tone}`}
-    >
-      <div className="public-v3-attendance-icon">
-        <Icon size={22} />
+    <div className={`public-v9-feature public-v9-feature-${tone}`}>
+      <div className="public-v9-feature-icon"><Icon size={24} /></div>
+      <div className="public-v9-feature-copy">
+        <h3>{title}</h3>
+        <p>{description}</p>
       </div>
+      <Link to={to} className="public-v9-feature-btn">
+        {action}<ArrowRight size={15} />
+      </Link>
+      <div className="public-v9-feature-decoration" aria-hidden="true" />
+    </div>
+  );
+}
 
+function AttendanceStat({ label, value, tone, onClick }) {
+  const icon = tone === 'green' ? CheckCircle2 : tone === 'red' ? TrendingDown : tone === 'orange' ? Info : Users;
+  const Icon = icon;
+  return (
+    <button type="button" className={`public-v9-attendance-stat ${tone}`} onClick={onClick}>
+      <Icon size={17} />
       <span>{label}</span>
       <strong>{value}</strong>
-
-      <small>
-        <FileSearch size={12} />
-        Detail
-      </small>
     </button>
   );
 }
 
-function TransactionRow({
-  title,
-  count,
-  tone,
-  onClick,
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="public-v3-transaction"
-    >
-      <div className={`public-v3-transaction-icon ${tone}`}>
-        <FileText size={16} />
-      </div>
-
-      <div className="public-v3-transaction-copy">
-        <strong>{title}</strong>
-        <span> Lihat rincian data publik</span>
-      </div>
-
-      <b className={tone}>
-        {count} Record
-      </b>
-
-      <ChevronRight size={17} />
-    </button>
-  );
-}
-
-function DetailModal({
-  title,
-  description,
-  rows,
-  kind,
-  onClose,
-}) {
+function DetailModal({ title, description, rows, kind, onClose }) {
   const [search, setSearch] = useState('');
-
   const filtered = useMemo(() => {
     const q = normalize(search);
-
     if (!q) return rows;
-
-    return rows.filter((row) =>
-      [
-        row.nama,
-        row.idAnggota,
-        row.kelas,
-        row.status,
-        row.jenis,
-        row.kegiatan,
-        row.keperluan,
-        row.sumber,
-        row.referensi,
-      ]
-        .join(' ')
-        .toLowerCase()
-        .includes(q)
-    );
+    return rows.filter((row) => [
+      row.nama, row.idAnggota, row.kelas, row.status, row.jenis,
+      row.kegiatan, row.keperluan, row.sumber, row.referensi,
+    ].join(' ').toLowerCase().includes(q));
   }, [rows, search]);
 
   return (
-    <div className="public-v3-modal-backdrop">
-      <div className="public-v3-modal">
-        <div className="public-v3-modal-head">
+    <div className="public-v9-modal-backdrop">
+      <div className="public-v9-modal">
+        <div className="public-v9-modal-head">
           <div>
             <span>TRANSPARANSI PUBLIK</span>
             <h2>{title}</h2>
             <p>{description}</p>
           </div>
-
-          <button
-            type="button"
-            className="public-v3-modal-close"
-            onClick={onClose}
-            aria-label="Tutup"
-          >
+          <button type="button" className="public-v9-modal-close" onClick={onClose} aria-label="Tutup">
             <X size={18} />
           </button>
         </div>
-
-        <div className="public-v3-modal-tools">
-          <div className="public-v3-search">
+        <div className="public-v9-modal-tools">
+          <div className="public-v9-search">
             <Search size={15} />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari nama, ID anggota, kelas..."
-            />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari nama, ID anggota, kelas..." />
           </div>
-
           <span>{filtered.length} record</span>
         </div>
-
-        <div className="public-v3-table-wrap">
-          <table className="public-v3-table">
+        <div className="public-v9-table-wrap">
+          <table className="public-v9-table">
             <thead>
               <tr>
                 <th>ANGGOTA</th>
                 <th>KELAS</th>
-                {kind === 'attendance' && (
-                  <>
-                    <th>KEGIATAN</th>
-                    <th>STATUS</th>
-                    <th>TANGGAL</th>
-                  </>
-                )}
-                {kind === 'finance' && (
-                  <>
-                    <th>DETAIL</th>
-                    <th>NOMINAL</th>
-                    <th>STATUS</th>
-                    <th>TANGGAL</th>
-                  </>
-                )}
-                {kind === 'expense' && (
-                  <>
-                    <th>SUMBER</th>
-                    <th>KEPERLUAN</th>
-                    <th>NOMINAL</th>
-                    <th>TANGGAL</th>
-                  </>
-                )}
+                {kind === 'attendance' && <><th>KEGIATAN</th><th>STATUS</th><th>TANGGAL</th></>}
+                {kind === 'finance' && <><th>DETAIL</th><th>NOMINAL</th><th>STATUS</th><th>TANGGAL</th></>}
+                {kind === 'expense' && <><th>SUMBER</th><th>KEPERLUAN</th><th>NOMINAL</th><th>TANGGAL</th></>}
               </tr>
             </thead>
-
             <tbody>
               {filtered.map((row, index) => (
                 <tr key={`${row.referensi || row.absensiId || index}-${index}`}>
-                  <td>
-                    <div className="public-v3-person">
-                      <div className="public-v3-avatar">
-                        <Users size={15} />
-                      </div>
-
-                      <div>
-                        <strong>{row.nama || '-'}</strong>
-                        <span>{row.idAnggota || '-'}</span>
-                      </div>
-                    </div>
-                  </td>
-
+                  <td><div className="public-v9-person"><div className="public-v9-avatar"><Users size={15} /></div><div><strong>{row.nama || '-'}</strong><span>{row.idAnggota || '-'}</span></div></div></td>
                   <td>{row.kelas || '-'}</td>
-
-                  {kind === 'attendance' && (
-                    <>
-                      <td>{row.kegiatan || '-'}</td>
-                      <td>
-                        <span className={`public-v3-status ${normalize(row.status)}`}>
-                          {row.status || '-'}
-                        </span>
-                      </td>
-                      <td>{formatDate(row.tanggal)}</td>
-                    </>
-                  )}
-
-                  {kind === 'finance' && (
-                    <>
-                      <td>
-                        {row.kegiatan || row.jenis || '-'}
-                      </td>
-                      <td>
-                        <strong className={normalize(row.status).includes('belum') ? 'public-v3-money danger' : 'public-v3-money'}>
-                          {rupiah(row.nominal)}
-                        </strong>
-                      </td>
-                      <td>
-                        <span className={`public-v3-status ${normalize(row.status)}`}>
-                          {row.status || '-'}
-                        </span>
-                      </td>
-                      <td>{formatDate(row.tanggal)}</td>
-                    </>
-                  )}
-
-                  {kind === 'expense' && (
-                    <>
-                      <td>{row.sumber || '-'}</td>
-                      <td>{row.keperluan || '-'}</td>
-                      <td>
-                        <strong className="public-v3-money danger">
-                          {rupiah(row.nominal)}
-                        </strong>
-                      </td>
-                      <td>{formatDate(row.tanggal)}</td>
-                    </>
-                  )}
+                  {kind === 'attendance' && <><td>{row.kegiatan || '-'}</td><td><span className={`public-v9-status ${normalize(row.status)}`}>{row.status || '-'}</span></td><td>{formatDate(row.tanggal)}</td></>}
+                  {kind === 'finance' && <><td>{row.kegiatan || row.jenis || '-'}</td><td><strong className="public-v9-money">{rupiah(row.nominal)}</strong></td><td><span className={`public-v9-status ${normalize(row.status)}`}>{row.status || '-'}</span></td><td>{formatDate(row.tanggal)}</td></>}
+                  {kind === 'expense' && <><td>{row.sumber || '-'}</td><td>{row.keperluan || '-'}</td><td><strong className="public-v9-money danger">{rupiah(row.nominal)}</strong></td><td>{formatDate(row.tanggal)}</td></>}
                 </tr>
               ))}
-
-              {!filtered.length && (
-                <tr>
-                  <td
-                    colSpan="8"
-                    className="public-v3-empty"
-                  >
-                    Data tidak ditemukan.
-                  </td>
-                </tr>
-              )}
+              {!filtered.length && <tr><td colSpan="8" className="public-v9-empty">Data tidak ditemukan.</td></tr>}
             </tbody>
           </table>
         </div>
       </div>
     </div>
   );
+}
+
+function monthKey(dateValue) {
+  const d = new Date(dateValue);
+  if (Number.isNaN(d.getTime())) return null;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function monthLabel(key) {
+  const [y, m] = String(key).split('-').map(Number);
+  if (!y || !m) return '-';
+  return new Intl.DateTimeFormat('id-ID', { month: 'short' }).format(new Date(y, m - 1, 1));
 }
 
 export default function PublicDashboard() {
@@ -349,529 +190,188 @@ export default function PublicDashboard() {
 
   async function load() {
     setError('');
-
     try {
-      const result = await getApi('public.dashboard', {});
-      setData(result);
+      setData(await getApi('public.dashboard', {}));
     } catch (err) {
-      setError(
-        err.message || 'Gagal memuat laporan publik.'
-      );
+      setError(err.message || 'Gagal memuat laporan publik.');
     }
   }
 
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(() => { load(); }, []);
 
   if (error) {
-    return (
-      <div className="public-v3-error">
-        <div>
-          <ShieldCheck size={30} />
-          <h2>Laporan publik tidak tersedia</h2>
-          <p>{error}</p>
-          <button type="button" onClick={load}>
-            Coba Lagi
-          </button>
-        </div>
-      </div>
-    );
+    return <div className="public-v9-state"><ShieldCheck size={32} /><h2>Laporan publik tidak tersedia</h2><p>{error}</p><button type="button" onClick={load}>Coba Lagi</button></div>;
   }
-
   if (!data) {
-    return (
-      <div className="public-v3-loading">
-        <div className="public-v3-loading-orb">
-          <Sparkles size={24} />
-        </div>
-        <strong>Menyiapkan Laporan Publik</strong>
-        <span>Mengambil data terbaru PMR SMANEL...</span>
-      </div>
-    );
+    return <div className="public-v9-state"><div className="public-v9-state-icon"><Sparkles size={24} /></div><strong>Menyiapkan Laporan Publik</strong><span>Mengambil data terbaru PMR SMANEL...</span></div>;
   }
 
-  const finance = data.finance || {};
+  const finance = data?.finance || {};
   const kas = finance.KAS || {};
   const denda = finance.DENDA || {};
   const attendance = data.presensiTerakhir || {};
+  const details = data.details || {};
+  const totalPiutang = Number(data.tunggakanKas?.total || 0) + Number(data.tunggakanDenda?.total || 0);
+  const totalAttendance = Number(attendance.hadir || 0) + Number(attendance.izin || 0) + Number(attendance.sakit || 0) + Number(attendance.alpha || 0);
+  const attendanceRate = totalAttendance > 0 ? Math.round((Number(attendance.hadir || 0) / totalAttendance) * 100) : 0;
+  const heroDate = data.updatedAt ? formatLongDate(data.updatedAt) : formatLongDate(new Date());
 
-  const heroDate =
-    data.updatedAt
-      ? formatLongDate(data.updatedAt)
-      : formatLongDate(new Date());
+  const incomeRows = details.KAS_LUNAS || [];
+  const expenseRows = details.PENGELUARAN || [];
+  const buckets = {};
+  [...incomeRows, ...expenseRows].forEach((row) => {
+    const key = monthKey(row.tanggal);
+    if (!key) return;
+    if (!buckets[key]) buckets[key] = { income: 0, expense: 0 };
+    const amount = Number(row.nominal || 0);
+    if (incomeRows.includes(row)) buckets[key].income += amount;
+    else buckets[key].expense += amount;
+  });
+  const chartKeys = Object.keys(buckets).sort().slice(-6);
+  const chart = chartKeys.length
+    ? chartKeys.map((key) => ({ key, label: monthLabel(key), ...buckets[key] }))
+    : [{ key: 'current', label: 'Kini', income: Number(kas.pemasukan || 0), expense: Number(data?.totalPengeluaran || 0) }];
+
+  const maxChart = Math.max(1, ...chart.map((x) => Math.max(x.income, x.expense)));
+
+  const donut = totalAttendance > 0 ? {
+    hadir: Math.round((Number(attendance.hadir || 0) / totalAttendance) * 100),
+    izin: Math.round((Number(attendance.izin || 0) / totalAttendance) * 100),
+    sakit: Math.round((Number(attendance.sakit || 0) / totalAttendance) * 100),
+    alpha: Math.max(0, 100 - Math.round((Number(attendance.hadir || 0) / totalAttendance) * 100) - Math.round((Number(attendance.izin || 0) / totalAttendance) * 100) - Math.round((Number(attendance.sakit || 0) / totalAttendance) * 100)),
+  } : { hadir: 0, izin: 0, sakit: 0, alpha: 0 };
 
   function openDetail(type) {
-    const rows = data.details?.[type] || [];
-
     const map = {
-      KAS_LUNAS: {
-        title: 'Dana Kas (Lunas)',
-        description:
-          'Riwayat pembayaran Kas anggota yang telah tercatat.',
-        kind: 'finance',
-      },
-      DENDA_LUNAS: {
-        title: 'Dana Denda (Lunas)',
-        description:
-          'Riwayat pembayaran Denda anggota yang telah lunas.',
-        kind: 'finance',
-      },
-      KAS_TUNGGAKAN: {
-        title: 'Tunggakan Kas',
-        description:
-          'Daftar kewajiban Kas anggota yang masih aktif.',
-        kind: 'finance',
-      },
-      DENDA_TUNGGAKAN: {
-        title: 'Tunggakan Denda',
-        description:
-          'Daftar Denda anggota yang masih belum lunas.',
-        kind: 'finance',
-      },
-      PENGELUARAN: {
-        title: 'Log Pengeluaran',
-        description:
-          'Daftar penggunaan dana yang telah dicatat.',
-        kind: 'expense',
-      },
-      PRESENSI_HADIR: {
-        title: 'Anggota Hadir',
-        description:
-          'Anggota yang hadir pada presensi terbaru.',
-        kind: 'attendance',
-      },
-      PRESENSI_ALPHA: {
-        title: 'Anggota Alpha',
-        description:
-          'Anggota yang tercatat Alpha pada presensi terbaru.',
-        kind: 'attendance',
-      },
-      PRESENSI_SAKIT: {
-        title: 'Anggota Sakit',
-        description:
-          'Anggota yang tercatat Sakit pada presensi terbaru.',
-        kind: 'attendance',
-      },
-      PRESENSI_IZIN: {
-        title: 'Anggota Izin',
-        description:
-          'Anggota yang tercatat Izin pada presensi terbaru.',
-        kind: 'attendance',
-      },
+      KAS_LUNAS: ['Laporan KAS', 'Riwayat pembayaran Kas anggota yang tercatat.', 'finance'],
+      DENDA_LUNAS: ['Laporan Denda', 'Riwayat pembayaran Denda anggota yang telah lunas.', 'finance'],
+      KAS_TUNGGAKAN: ['Tunggakan Kas', 'Daftar kewajiban Kas anggota yang masih aktif.', 'finance'],
+      DENDA_TUNGGAKAN: ['Tunggakan Denda', 'Daftar Denda anggota yang masih belum lunas.', 'finance'],
+      PENGELUARAN: ['Pengeluaran', 'Daftar penggunaan dana yang telah dicatat.', 'expense'],
+      PRESENSI_HADIR: ['Kehadiran', 'Anggota yang hadir pada presensi terbaru.', 'attendance'],
+      PRESENSI_ALPHA: ['Anggota Alpha', 'Anggota yang tercatat Alpha pada presensi terbaru.', 'attendance'],
+      PRESENSI_SAKIT: ['Anggota Sakit', 'Anggota yang tercatat Sakit pada presensi terbaru.', 'attendance'],
+      PRESENSI_IZIN: ['Anggota Izin', 'Anggota yang tercatat Izin pada presensi terbaru.', 'attendance'],
     };
-
-    setDetail({
-      type,
-      rows,
-      ...map[type],
-    });
+    const [title, description, kind] = map[type];
+    setDetail({ title, description, kind, rows: details[type] || [] });
   }
 
   return (
-    <div className="public-v3-page">
-      <header className="public-v3-topbar">
-     <Link
-  to="/"
-  className="public-v3-brand"
-  aria-label="PMR SMANEL"
->
-  <img
-    src={`${import.meta.env.BASE_URL}logo-pmr-smanel.png`}
-    alt="Logo PMR SMANEL"
-    className="public-v3-brand-logo"
-    onError={(event) => {
-      event.currentTarget.style.display = 'none';
-      event.currentTarget.nextElementSibling?.classList.add('is-visible');
-    }}
-  />
-  <span className="public-v3-brand-fallback" aria-hidden="true">PMR</span>
-
-  <div className="public-v3-brand-text">
-    <strong>PMR SMANEL</strong>
-    <span>PALANG MERAH REMAJA</span>
-  </div>
-</Link>
-
-        <Link to="/login" className="public-v3-login">
-          <LockKeyhole size={15} />
-          Login Pengurus
-          <ArrowRight size={15} />
+    <div className="public-v9-page">
+      <header className="public-v9-header">
+        <Link to="/" className="public-v9-brand" aria-label="PMR SMANEL">
+          <img src={`${import.meta.env.BASE_URL}logo-pmr-smanel.png`} alt="Logo PMR SMANEL" />
+          <div><strong>PMR SMANEL</strong><span>SMAN 1 AIKMEL</span></div>
         </Link>
+        <nav className="public-v9-nav" aria-label="Navigasi publik">
+          <a className="active" href="#beranda">Beranda</a>
+          <a href="#laporan-kas">Laporan KAS</a>
+          <a href="#kehadiran">Kehadiran</a>
+          <a href="#denda">Denda</a>
+          <a href="#informasi">Informasi</a>
+          <a href="#tentang">Tentang</a>
+        </nav>
+        <div className="public-v9-header-actions">
+          <button type="button" className="public-v9-search-btn" aria-label="Pencarian tidak tersedia di halaman utama"><Search size={17} /></button>
+          <Link to="/login" className="public-v9-login-btn"><LockKeyhole size={15} /> Masuk <ArrowRight size={15} /></Link>
+        </div>
       </header>
 
-      <main>
-        <section
-          id="beranda"
-          className="public-v3-hero"
-        >
-          <div className="public-v3-hero-copy">
-            <span className="public-v3-pill">
-              <Sparkles size={12} />
-              Portal Transparansi PMR SMANEL
-            </span>
-
-            <h1>
-              Laporan Publik
-              <br />
-              <strong>PMR SMANEL</strong>
-            </h1>
-
-            <p>
-              Informasi kehadiran anggota dan ringkasan
-              arus kas organisasi disajikan secara terbuka,
-              ringkas, dan mudah dipahami.
-            </p>
-
-            <div className="public-v3-update-chip">
-              <Clock3 size={14} />
-              Data diperbarui {heroDate}
-            </div>
-
-            <div className="public-v3-hero-actions">
-              <a href="#laporan" className="public-v3-primary-btn">
-                Lihat Laporan
-                <ArrowRight size={16} />
-              </a>
-
-              <a href="#tentang" className="public-v3-secondary-btn">
-                Tentang Sistem
-              </a>
-            </div>
+      <main id="beranda">
+        <section className="public-v9-hero">
+          <div className="public-v9-hero-copy">
+            <span className="public-v9-eyebrow">TRANSPARANSI ORGANISASI</span>
+            <h1><span>TRANSPARANSI</span><strong>PMR SMANEL</strong></h1>
+            <div className="public-v9-motto">Terbuka <i>•</i> Akuntabel <i>•</i> Bersama</div>
+            <p>Portal transparansi PMR SMAN 1 Aikmel yang menyediakan informasi keuangan, kehadiran anggota, denda, serta aktivitas organisasi secara terbuka dan berkala.</p>
+            <div className="public-v9-hero-meta"><Clock3 size={14} /> Data diperbarui {heroDate}</div>
+            <a href="#laporan-kas" className="public-v9-primary-btn">Lihat Laporan KAS <ArrowRight size={16} /></a>
           </div>
-
-          <div className="public-v3-hero-art" aria-hidden="true">
-            <div className="public-v4-orbit orbit-one" />
-            <div className="public-v4-orbit orbit-two" />
-
-            <div className="public-v4-board">
-              <div className="public-v4-board-head">
-                <div>
-                  <span>PMR SMANEL</span>
-                  <strong>Transparency Overview</strong>
-                </div>
-                <span className="public-v4-live-dot">LIVE</span>
-              </div>
-
-              <div className="public-v4-board-balance">
-                <span>Saldo organisasi</span>
-                <strong>{rupiah(Number(kas.saldo || 0) + Number(denda.saldo || 0))}</strong>
-                <small>Kas + Denda tercatat</small>
-              </div>
-
-              <div className="public-v4-board-grid">
-                <div className="public-v4-mini-card">
-                  <Wallet size={16} />
-                  <span>Kas</span>
-                  <strong>{rupiah(kas.saldo)}</strong>
-                </div>
-                <div className="public-v4-mini-card">
-                  <Users size={16} />
-                  <span>Anggota</span>
-                  <strong>{data.anggotaAktif || 0}</strong>
-                </div>
-                <div className="public-v4-mini-card">
-                  <BarChart3 size={16} />
-                  <span>Pemasukan</span>
-                  <strong>{rupiah(data.totalPemasukan)}</strong>
-                </div>
-                <div className="public-v4-mini-card">
-                  <ShieldCheck size={16} />
-                  <span>Piutang</span>
-                  <strong>{rupiah(Number(data.tunggakanKas?.total || 0) + Number(data.tunggakanDenda?.total || 0))}</strong>
-                </div>
-              </div>
+          <div className="public-v9-hero-media">
+            <img
+              src={`${import.meta.env.BASE_URL}hero-pmr-smanel.jpg`}
+              alt="Kegiatan PMR SMAN 1 Aikmel"
+              className="public-v9-hero-image"
+            />
+            <div className="public-v9-hero-tagline">
+              <span>Together We Can</span>
+              <strong>We Are Not Alone</strong>
             </div>
-
-            <div className="public-v4-float-card float-top">
-              <CheckCircle2 size={15} />
-              <div>
-                <span>Kehadiran terakhir</span>
-                <strong>{attendance.hadir || 0} hadir</strong>
-              </div>
-            </div>
-
-            <div className="public-v4-float-card float-bottom">
-              <LockKeyhole size={14} />
-              <div>
-                <span>Data publik</span>
-                <strong>Terverifikasi</strong>
-              </div>
+            <div className="public-v9-hero-badge">
+              <ShieldCheck size={14} />
+              <span>DATA TERBUKA</span>
             </div>
           </div>
         </section>
 
-        <section
-          id="laporan"
-          className="public-v3-metrics-wrap"
-        >
-          <MetricCard
-            icon={Wallet}
-            title="Saldo Kas Aktif"
-            value={rupiah(kas.saldo)}
-            tone="purple"
-          />
-
-          <MetricCard
-            icon={Wallet}
-            title="Saldo Denda Terkumpul"
-            value={rupiah(denda.saldo)}
-            tone="pink"
-          />
-
-          <MetricCard
-            icon={TrendingUp}
-            title="Pemasukan Kas"
-            value={rupiah(kas.pemasukan)}
-            tone="green"
-            clickable
-            onClick={() => openDetail('KAS_LUNAS')}
-          />
-
-          <MetricCard
-            icon={ArrowDownLeft}
-            title="Tunggakan Kas"
-            value={rupiah(data.tunggakanKas?.total)}
-            tone="orange"
-            clickable
-            onClick={() => openDetail('KAS_TUNGGAKAN')}
-          />
-
-          <MetricCard
-            icon={ShieldCheck}
-            title="Tunggakan Denda"
-            value={rupiah(data.tunggakanDenda?.total)}
-            tone="red"
-            clickable
-            onClick={() => openDetail('DENDA_TUNGGAKAN')}
-          />
-
-          <MetricCard
-            icon={ArrowUpRight}
-            title="Total Pengeluaran"
-            value={rupiah(data.totalPengeluaran)}
-            tone="violet"
-            clickable
-            onClick={() => openDetail('PENGELUARAN')}
-          />
+        <section className="public-v9-kpi-grid" id="laporan-kas">
+          <MetricCard icon={Wallet} title="Saldo KAS" value={rupiah(kas.saldo)} caption="Saldo kas aktif" tone="red" onClick={() => openDetail('KAS_LUNAS')} />
+          <MetricCard icon={Users} title="Total Anggota" value={`${data.anggotaAktif || 0} Orang`} caption="Anggota aktif" tone="blue" />
+          <MetricCard icon={BarChart3} title="Kehadiran Terakhir" value={`${attendanceRate}%`} caption={attendance.kegiatan || 'Belum ada kegiatan'} tone="green" onClick={() => openDetail('PRESENSI_HADIR')} />
+          <MetricCard icon={ShieldCheck} title="Total Denda" value={rupiah(denda.saldo)} caption={`${data.transaksi?.dendaTunggakan || 0} belum lunas`} tone="gold" onClick={() => openDetail('DENDA_TUNGGAKAN')} />
         </section>
 
-        <section className="public-v3-content-grid">
-          <div className="public-v3-panel">
-            <div className="public-v3-panel-head">
-              <div>
-                <span>AKTIVITAS TERBARU</span>
-                <h2>
-                  <CalendarDays size={18} />
-                  Ringkasan Presensi Terakhir
-                </h2>
-              </div>
+        <section className="public-v9-feature-grid">
+          <FeatureCard icon={Wallet} title="Laporan KAS" description="Lihat detail pemasukan, pengeluaran, saldo, dan riwayat transaksi PMR SMANEL secara transparan." to="#laporan-kas" tone="red" action="Lihat Laporan KAS" />
+          <FeatureCard icon={Users} title="Kehadiran" description="Rekap kehadiran anggota, termasuk hadir, izin, sakit, dan alpha, beserta detailnya." to="#kehadiran" tone="blue" action="Lihat Kehadiran" />
+          <FeatureCard icon={ShieldCheck} title="Denda" description="Informasi denda anggota berdasarkan ketentuan yang berlaku di PMR SMANEL." to="#denda" tone="gold" action="Lihat Denda" />
+        </section>
 
-              <span className="public-v3-count-pill">
-                {data.anggotaAktif} Anggota
-              </span>
+        <section className="public-v9-analytics-grid">
+          <div className="public-v9-panel">
+            <div className="public-v9-panel-head"><div><span>KEUANGAN</span><h2>Pergerakan Pemasukan & Pengeluaran</h2></div><span className="public-v9-year">Data publik</span></div>
+            <div className="public-v9-bar-chart">
+              {chart.map((item) => <div className="public-v9-bar-col" key={item.key}><div className="public-v9-bars"><span className="income" style={{ height: `${Math.max(4, (item.income / maxChart) * 120)}px` }} /><span className="expense" style={{ height: `${Math.max(4, (item.expense / maxChart) * 120)}px` }} /></div><small>{item.label}</small></div>)}
             </div>
-
-            <div className="public-v3-attendance-title">
-              <strong>
-                {attendance.kegiatan || 'Belum ada kegiatan'}
-              </strong>
-              <span>
-                <CalendarDays size={13} />
-                {formatDate(attendance.tanggal)}
-              </span>
-            </div>
-
-            <div className="public-v3-attendance-grid">
-              <AttendanceCard
-                label="HADIR"
-                value={attendance.hadir || 0}
-                tone="green"
-                onClick={() => openDetail('PRESENSI_HADIR')}
-              />
-
-              <AttendanceCard
-                label="ALPHA"
-                value={attendance.alpha || 0}
-                tone="red"
-                onClick={() => openDetail('PRESENSI_ALPHA')}
-              />
-
-              <AttendanceCard
-                label="SAKIT"
-                value={attendance.sakit || 0}
-                tone="orange"
-                onClick={() => openDetail('PRESENSI_SAKIT')}
-              />
-
-              <AttendanceCard
-                label="IZIN"
-                value={attendance.izin || 0}
-                tone="blue"
-                onClick={() => openDetail('PRESENSI_IZIN')}
-              />
-            </div>
-
-            <div className="public-v3-panel-foot">
-              <span>
-                <Users size={13} />
-                Data kehadiran ditampilkan untuk
-                keterbukaan informasi organisasi.
-              </span>
-            </div>
+            <div className="public-v9-legend"><span><i className="income-dot" /> Pemasukan</span><span><i className="expense-dot" /> Pengeluaran</span></div>
           </div>
 
-          <div className="public-v3-panel">
-            <div className="public-v3-panel-head">
-              <div>
-                <span>KEUANGAN ORGANISASI</span>
-                <h2>
-                  <BarChart3 size={18} />
-                  Rincian Total Transaksi
-                </h2>
-              </div>
-
-              <span className="public-v3-soft-label">
-                Real-time
-              </span>
-            </div>
-
-            <div className="public-v3-panel-desc">
-              Klik salah satu baris untuk melihat
-              data rinci publik.
-            </div>
-
-            <div className="public-v3-transaction-list">
-              <TransactionRow
-                title="Dana Kas (Lunas)"
-                count={data.transaksi?.kasLunas || 0}
-                tone="green"
-                onClick={() => openDetail('KAS_LUNAS')}
-              />
-
-              <TransactionRow
-                title="Dana Denda (Lunas)"
-                count={data.transaksi?.dendaLunas || 0}
-                tone="pink"
-                onClick={() => openDetail('DENDA_LUNAS')}
-              />
-
-              <TransactionRow
-                title="Tunggakan Kas"
-                count={data.transaksi?.kasTunggakan || 0}
-                tone="orange"
-                onClick={() => openDetail('KAS_TUNGGAKAN')}
-              />
-
-              <TransactionRow
-                title="Tunggakan Denda"
-                count={data.transaksi?.dendaTunggakan || 0}
-                tone="red"
-                onClick={() => openDetail('DENDA_TUNGGAKAN')}
-              />
-
-              <TransactionRow
-                title="Log Pengeluaran"
-                count={data.transaksi?.pengeluaran || 0}
-                tone="violet"
-                onClick={() => openDetail('PENGELUARAN')}
-              />
+          <div className="public-v9-panel" id="kehadiran">
+            <div className="public-v9-panel-head"><div><span>KEHADIRAN</span><h2>Statistik Kehadiran</h2></div><span className="public-v9-soft-badge">Terakhir</span></div>
+            <div className="public-v9-donut-wrap">
+              <div className="public-v9-donut" style={{ '--a': `${donut.hadir}%`, '--b': `${donut.hadir + donut.izin}%`, '--c': `${donut.hadir + donut.izin + donut.sakit}%` }}><div><strong>{donut.hadir}%</strong><span>Hadir</span></div></div>
+              <div className="public-v9-donut-legend"><span><i className="dot-hadir" /> Hadir <b>{donut.hadir}%</b></span><span><i className="dot-izin" /> Izin <b>{donut.izin}%</b></span><span><i className="dot-sakit" /> Sakit <b>{donut.sakit}%</b></span><span><i className="dot-alpha" /> Alpha <b>{donut.alpha}%</b></span></div>
             </div>
           </div>
         </section>
 
-        <section className="public-v3-stat-strip">
-          <div>
-            <div className="public-v3-strip-icon purple">
-              <Users size={17} />
+        <section className="public-v9-bottom-grid" id="informasi">
+          <div className="public-v9-panel">
+            <div className="public-v9-panel-head"><div><span>INFORMASI</span><h2>Ringkasan Terbaru</h2></div><span className="public-v9-soft-badge">Update</span></div>
+            <div className="public-v9-info-list">
+              <div><div className="public-v9-info-icon red"><Wallet size={16} /></div><div><strong>Laporan KAS</strong><span>{data.transaksi?.kasLunas || 0} transaksi KAS lunas tercatat.</span></div><small>{formatDate(data.updatedAt)}</small></div>
+              <div><div className="public-v9-info-icon blue"><Users size={16} /></div><div><strong>Kehadiran Terbaru</strong><span>{attendance.kegiatan || 'Belum ada kegiatan'}.</span></div><small>{formatDate(attendance.tanggal)}</small></div>
+              <div><div className="public-v9-info-icon gold"><ShieldCheck size={16} /></div><div><strong>Pembayaran Denda</strong><span>{data.transaksi?.dendaLunas || 0} transaksi denda lunas.</span></div><small>{formatDate(data.updatedAt)}</small></div>
+              <div><div className="public-v9-info-icon purple"><CalendarDays size={16} /></div><div><strong>Kondisi Organisasi</strong><span>{data.anggotaAktif || 0} anggota aktif dan {totalPiutang > 0 ? rupiah(totalPiutang) : 'tidak ada'} piutang.</span></div><small>Live</small></div>
             </div>
-            <span>Anggota Aktif</span>
-            <strong>{data.anggotaAktif || 0}</strong>
           </div>
 
-          <div>
-            <div className="public-v3-strip-icon pink">
-              <CalendarDays size={17} />
+          <div className="public-v9-panel" id="denda">
+            <div className="public-v9-panel-head"><div><span>MONITORING ORGANISASI</span><h2>Posisi Dana</h2></div><span className="public-v9-soft-badge">Real-time</span></div>
+            <div className="public-v9-position-grid">
+              <div><span>Saldo KAS</span><strong>{rupiah(kas.saldo)}</strong></div>
+              <div><span>Saldo Denda</span><strong>{rupiah(denda.saldo)}</strong></div>
+              <div><span>Piutang KAS</span><strong>{rupiah(data.tunggakanKas?.total)}</strong></div>
+              <div><span>Piutang Denda</span><strong>{rupiah(data.tunggakanDenda?.total)}</strong></div>
             </div>
-            <span>Kegiatan Terakhir</span>
-            <strong>{attendance.total || 0}</strong>
-          </div>
-
-          <div>
-            <div className="public-v3-strip-icon green">
-              <TrendingUp size={17} />
-            </div>
-            <span>Total Pemasukan</span>
-            <strong>{rupiah(data.totalPemasukan)}</strong>
-          </div>
-
-          <div>
-            <div className="public-v3-strip-icon orange">
-              <ShieldCheck size={17} />
-            </div>
-            <span>Total Piutang</span>
-            <strong>
-              {rupiah(
-                Number(data.tunggakanKas?.total || 0) +
-                Number(data.tunggakanDenda?.total || 0)
-              )}
-            </strong>
+            <div className="public-v9-panel-action"><button type="button" onClick={() => openDetail('DENDA_TUNGGAKAN')}>Lihat Detail Denda <ArrowRight size={15} /></button></div>
           </div>
         </section>
 
-        <section
-          id="tentang"
-          className="public-v3-cta"
-        >
-          <div className="public-v3-cta-icon">
-            <Heart size={28} />
-          </div>
-
-          <div className="public-v3-cta-copy">
-            <span>TRANSPARANSI, KEPEDULIAN, AKSI</span>
-            <h2>
-              Bersama PMR SMANEL, transparansi menjadi
-              bagian dari budaya organisasi.
-            </h2>
-            <p>
-              Informasi kehadiran dan ringkasan keuangan
-              disajikan agar seluruh anggota dapat
-              mengetahui perkembangan organisasi.
-            </p>
-          </div>
-
-          <a
-            href="#laporan"
-            className="public-v3-cta-button"
-          >
-            Lihat Laporan
-            <ArrowRight size={16} />
-          </a>
-
-          <div className="public-v3-cta-decoration">
-            <div className="bubble bubble-one" />
-            <div className="bubble bubble-two" />
-            <div className="bubble bubble-three" />
-          </div>
+        <section className="public-v9-about" id="tentang">
+          <div><span>PMR SMAN 1 AIKMEL</span><h2>Terbuka. Akuntabel. Bersama.</h2><p>Portal ini menyajikan ringkasan informasi organisasi untuk mendukung budaya transparansi, kepedulian, dan pengelolaan yang bertanggung jawab.</p></div>
+          <div className="public-v9-about-mark"><Heart size={25} /><strong>Together We Can,<br />We Are Not Alone</strong></div>
         </section>
       </main>
 
-      <footer className="public-v3-footer">
-        <span>PMR SMANEL MANAGEMENT SYSTEM</span>
-        <span>
-          Transparan • Terpercaya • Menginspirasi
-        </span>
+      <footer className="public-v9-footer">
+        <div><strong>PMR SMANEL</strong><span>SMAN 1 AIKMEL</span></div>
+        <div><em>Together We Can, We Are Not Alone</em><span>Terbuka • Akuntabel • Bersama</span></div>
+        <div><span>© {new Date().getFullYear()} PMR SMAN 1 Aikmel</span></div>
       </footer>
 
-      {detail && (
-        <DetailModal
-          title={detail.title}
-          description={detail.description}
-          rows={detail.rows}
-          kind={detail.kind}
-          onClose={() => setDetail(null)}
-        />
-      )}
+      {detail && <DetailModal title={detail.title} description={detail.description} rows={detail.rows} kind={detail.kind} onClose={() => setDetail(null)} />}
     </div>
   );
 }

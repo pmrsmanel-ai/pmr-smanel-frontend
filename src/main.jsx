@@ -5,6 +5,7 @@ import App from './App';
 import './styles.css';
 import './money-pages.css';
 import './public-dashboard-v6.css';
+import './admin-dashboard-v2.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

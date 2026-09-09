@@ -1,3 +1,4 @@
+import ShellV2 from './components/layout/Shell';
 import React, {
   useEffect,
   useState,
@@ -51,6 +52,7 @@ import PemasukanPage from './pages/PemasukanPage';
 import PengeluaranPage from './pages/PengeluaranPage';
 import RiwayatAbsensiPage from './pages/RiwayatAbsensiPage';
 import PublicDashboard from './pages/PublicDashboard';
+import AdminDashboardV2 from './components/dashboard/AdminDashboardV2';
 
 
 // ======================================================
@@ -97,309 +99,6 @@ function Protected({
   }
 
   return children;
-}
-
-
-// ======================================================
-// MAIN SHELL
-// ======================================================
-
-function Shell({
-  children,
-}) {
-  const session = getSession();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const [open, setOpen] =
-    useState(false);
-
-  const navItems = [];
-
-
-  if (
-    ['ADMIN', 'SEKRETARIS'].includes(
-      session?.role
-    )
-  ) {
-    navItems.push(
-      {
-        to: '/dashboard',
-        label: 'Dashboard',
-        icon: LayoutDashboard,
-      },
-      {
-        to: '/kegiatan',
-        label: 'Kegiatan',
-        icon: CalendarDays,
-      },
-      {
-        to: '/absensi',
-        label: 'Absensi',
-        icon: ClipboardCheck,
-      },
-      {
-        to: '/anggota',
-        label: 'Anggota',
-        icon: Users,
-      },
-      {
-        to: '/riwayat-absensi',
-        label: 'Riwayat Absensi',
-        icon: ClipboardCheck,
-      }
-    );
-  }
-
-
-// ======================================================
-// BENDAHARA + ADMIN
-// ======================================================
-
-if (
-  ['ADMIN', 'BENDAHARA'].includes(
-    session?.role
-  )
-) {
-  navItems.push(
-    {
-      to: '/keuangan',
-      label: 'Keuangan',
-      icon: Wallet,
-    },
-    {
-      to: '/kas',
-      label: 'Kas',
-      icon: Wallet,
-    },
-    {
-      to: '/denda',
-      label: 'Denda',
-      icon: Coins,
-    },
-    {
-      to: '/pemasukan',
-      label: 'Pemasukan',
-      icon: TrendingUp,
-    },
-    {
-      to: '/pengeluaran',
-      label: 'Pengeluaran',
-      icon: TrendingDown,
-    },
-    {
-      to: '/laporan',
-      label: 'Laporan',
-      icon: FileText,
-    }
-  );
-}
-
-
-// ======================================================
-// ADMIN UTAMA
-// ======================================================
-
-if (
-  session?.role === 'ADMIN'
-) {
-  navItems.push({
-    to: '/pengaturan',
-    label: 'Pengaturan',
-    icon: Settings,
-  });
-}
-
-
-  function logout() {
-    clearSession();
-
-    navigate('/login', {
-      replace: true,
-    });
-  }
-
-
-  return (
-    <div className="app-shell">
-
-      <aside
-        className={`sidebar ${
-          open ? 'open' : ''
-        }`}
-      >
-
-        <div className="brand">
-
-          <div className="brand-logo-box">
-
-            <img
-  src={`${import.meta.env.BASE_URL}logo-pmr-smanel.jpg`}
-  alt="Logo PMR SMANEL"
-  className="login-logo-image"
-              onError={(event) => {
-                event.currentTarget.style.display =
-                  'none';
-
-                if (
-                  event.currentTarget
-                    .nextElementSibling
-                ) {
-                  event.currentTarget
-                    .nextElementSibling
-                    .style.display = 'grid';
-                }
-              }}
-            />
-
-            <div className="brand-logo-fallback">
-              PMR
-            </div>
-
-          </div>
-
-
-          <div className="brand-text">
-
-            <strong>
-              PMR SMANEL
-            </strong>
-
-            <span>
-              Absensi & Keuangan
-            </span>
-
-          </div>
-
-
-          <button
-            type="button"
-            className="icon-btn mobile-close"
-            onClick={() =>
-              setOpen(false)
-            }
-          >
-            <X size={18} />
-          </button>
-
-        </div>
-
-
-        <div className="sidebar-role">
-
-          <ShieldCheck size={16} />
-
-          {ROLE_LABEL[
-            session?.role
-          ] || session?.role}
-
-        </div>
-
-
-        <nav>
-
-          {navItems.map(
-            ({
-              to,
-              label,
-              icon: Icon,
-            }) => (
-              <Link
-                key={to}
-                to={to}
-                onClick={() =>
-                  setOpen(false)
-                }
-                className={`nav-item ${
-                  location.pathname === to
-                    ? 'active'
-                    : ''
-                }`}
-              >
-                <Icon size={18} />
-
-                <span>
-                  {label}
-                </span>
-              </Link>
-            )
-          )}
-
-        </nav>
-
-
-        <button
-          type="button"
-          className="logout-btn"
-          onClick={logout}
-        >
-          <LogOut size={17} />
-          Keluar
-        </button>
-
-      </aside>
-
-
-      {open && (
-        <div
-          className="sidebar-backdrop"
-          onClick={() =>
-            setOpen(false)
-          }
-        />
-      )}
-
-
-      <main className="main">
-
-        <header className="topbar">
-
-          <button
-            type="button"
-            className="icon-btn mobile-menu"
-            onClick={() =>
-              setOpen(true)
-            }
-          >
-            <Menu />
-          </button>
-
-
-          <div>
-
-            <div className="page-kicker">
-              PMR SMAN 1 AIKMEL
-            </div>
-
-            <div className="page-title">
-              Sistem Absensi & Keuangan
-            </div>
-
-          </div>
-
-
-          <div className="user-chip">
-
-            <UserRound size={17} />
-
-            {session?.username ||
-              ROLE_LABEL[
-                session?.role
-              ]}
-
-          </div>
-
-        </header>
-
-
-        <section className="content">
-          {children}
-        </section>
-
-      </main>
-
-    </div>
-  );
 }
 
 
@@ -658,6 +357,15 @@ function Dashboard() {
 
   const isAdmin =
     session.role === 'ADMIN';
+
+  if (isAdmin) {
+    return (
+      <AdminDashboardV2
+        data={data}
+        session={session}
+      />
+    );
+  }
 
   const isSekretaris =
     session.role ===
@@ -4049,9 +3757,9 @@ export default function App() {
               'BENDAHARA',
             ]}
           >
-            <Shell>
+            <ShellV2>
               <Dashboard />
-            </Shell>
+            </ShellV2>
           </Protected>
         }
       />
@@ -4066,9 +3774,9 @@ export default function App() {
               'SEKRETARIS',
             ]}
           >
-            <Shell>
+            <ShellV2>
               <KegiatanPage />
-            </Shell>
+            </ShellV2>
           </Protected>
         }
       />
@@ -4083,9 +3791,9 @@ export default function App() {
               'SEKRETARIS',
             ]}
           >
-            <Shell>
+            <ShellV2>
               <ConnectedAbsensiPage />
-            </Shell>
+            </ShellV2>
           </Protected>
         }
       />
@@ -4100,9 +3808,9 @@ export default function App() {
               'SEKRETARIS',
             ]}
           >
-            <Shell>
+            <ShellV2>
               <RiwayatAbsensiPage />
-            </Shell>
+            </ShellV2>
           </Protected>
         }
       />
@@ -4117,9 +3825,9 @@ export default function App() {
               'SEKRETARIS',
             ]}
           >
-            <Shell>
+            <ShellV2>
               <AnggotaPage />
-            </Shell>
+            </ShellV2>
           </Protected>
         }
       />
@@ -4134,9 +3842,9 @@ export default function App() {
               'BENDAHARA',
             ]}
           >
-            <Shell>
+            <ShellV2>
               <KeuanganPage />
-            </Shell>
+            </ShellV2>
           </Protected>
         }
       />
@@ -4150,9 +3858,9 @@ export default function App() {
         'BENDAHARA',
       ]}
     >
-      <Shell>
+      <ShellV2>
         <KasPageWrapper />
-      </Shell>
+      </ShellV2>
     </Protected>
   }
 />
@@ -4166,9 +3874,9 @@ export default function App() {
               'BENDAHARA',
             ]}
           >
-            <Shell>
+            <ShellV2>
               <Denda />
-            </Shell>
+            </ShellV2>
           </Protected>
         }
       />
@@ -4183,9 +3891,9 @@ export default function App() {
               'BENDAHARA',
             ]}
           >
-            <Shell>
+            <ShellV2>
               <PemasukanPage />
-            </Shell>
+            </ShellV2>
           </Protected>
         }
       />
@@ -4200,9 +3908,9 @@ export default function App() {
               'BENDAHARA',
             ]}
           >
-            <Shell>
+            <ShellV2>
               <PengeluaranPage />
-            </Shell>
+            </ShellV2>
           </Protected>
         }
       />
@@ -4217,9 +3925,9 @@ export default function App() {
               'BENDAHARA',
             ]}
           >
-            <Shell>
+            <ShellV2>
               <LaporanPage />
-            </Shell>
+            </ShellV2>
           </Protected>
         }
       />
@@ -4231,9 +3939,9 @@ export default function App() {
           <Protected
             roles={['ADMIN']}
           >
-            <Shell>
+            <ShellV2>
               <Pengaturan />
-            </Shell>
+            </ShellV2>
           </Protected>
         }
       />
