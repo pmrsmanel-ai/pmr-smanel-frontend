@@ -1,5 +1,6 @@
 import React, {
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 
@@ -11,10 +12,12 @@ import {
 
 import {
   CalendarDays,
+  ChevronDown,
   ClipboardCheck,
   Coins,
   FileText,
   LayoutDashboard,
+  LogIn,
   LogOut,
   Menu,
   Settings,
@@ -38,6 +41,8 @@ const ROLE_LABEL = {
   BENDAHARA: 'Bendahara',
 };
 
+const BASE = import.meta.env.BASE_URL;
+
 export default function Shell({
   children,
 }) {
@@ -45,26 +50,31 @@ export default function Shell({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [open, setOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  const financePaths = [
-    '/keuangan',
-    '/kas',
-    '/denda',
-    '/pemasukan',
-    '/pengeluaran',
-    '/laporan',
-  ];
+  const financePaths = useMemo(
+    () => [
+      '/keuangan',
+      '/kas',
+      '/denda',
+      '/pemasukan',
+      '/pengeluaran',
+      '/laporan',
+    ],
+    []
+  );
 
   const isFinancePath =
-    financePaths.includes(
-      location.pathname
-    );
+    financePaths.includes(location.pathname);
 
-  const [
-    financeOpen,
-    setFinanceOpen,
-  ] = useState(isFinancePath);
+  const isSystemPath =
+    location.pathname === '/pengaturan';
+
+  const [financeOpen, setFinanceOpen] =
+    useState(isFinancePath);
+
+  const [systemOpen, setSystemOpen] =
+    useState(isSystemPath);
 
   useEffect(() => {
     if (isFinancePath) {
@@ -72,41 +82,47 @@ export default function Shell({
     }
   }, [isFinancePath]);
 
-  const mainItems = [];
+  useEffect(() => {
+    if (isSystemPath) {
+      setSystemOpen(true);
+    }
+  }, [isSystemPath]);
 
-  if (
-    ['ADMIN', 'SEKRETARIS'].includes(
-      session?.role
-    )
-  ) {
-    mainItems.push(
-      {
-        to: '/dashboard',
-        label: 'Dashboard',
-        icon: LayoutDashboard,
-      },
-      {
-        to: '/kegiatan',
-        label: 'Kegiatan',
-        icon: CalendarDays,
-      },
-      {
-        to: '/absensi',
-        label: 'Absensi',
-        icon: ClipboardCheck,
-      },
-      {
-        to: '/anggota',
-        label: 'Anggota',
-        icon: Users,
-      }
-    );
-  }
+  const canOperate =
+    ['ADMIN', 'SEKRETARIS'].includes(session?.role);
 
   const canFinance =
-    ['ADMIN', 'BENDAHARA'].includes(
-      session?.role
-    );
+    ['ADMIN', 'BENDAHARA'].includes(session?.role);
+
+  const mainItems = canOperate
+    ? [
+        {
+          to: '/dashboard',
+          label: 'Dashboard',
+          icon: LayoutDashboard,
+        },
+        {
+          to: '/kegiatan',
+          label: 'Kegiatan',
+          icon: CalendarDays,
+        },
+        {
+          to: '/absensi',
+          label: 'Absensi',
+          icon: ClipboardCheck,
+        },
+        {
+          to: '/anggota',
+          label: 'Anggota',
+          icon: Users,
+        },
+        {
+          to: '/riwayat-absensi',
+          label: 'Riwayat Absensi',
+          icon: ClipboardCheck,
+        },
+      ]
+    : [];
 
   const financeItems = canFinance
     ? [
@@ -152,61 +168,69 @@ export default function Shell({
   }
 
   function closeSidebar() {
-    setOpen(false);
+    setMobileOpen(false);
   }
+
+  function toggleFinance() {
+    setFinanceOpen((value) => !value);
+  }
+
+  function toggleSystem() {
+    setSystemOpen((value) => !value);
+  }
+
+  const roleLabel =
+    ROLE_LABEL[session?.role] ||
+    session?.role ||
+    'Pengguna';
 
   return (
     <div className="app-shell">
 
       <aside
-        className={`sidebar ${
-          open ? 'open' : ''
+        className={`sidebar sidebar-compact ${
+          mobileOpen ? 'open' : ''
         }`}
       >
 
         <div className="brand">
 
-          <div className="brand-logo-box">
+          <Link
+            to="/dashboard"
+            className="brand-home-link"
+            onClick={closeSidebar}
+          >
+            <div className="brand-logo-box">
+              <img
+                src={`${BASE}logo-pmr-smanel.png`}
+                alt="Logo PMR SMANEL"
+                className="brand-logo"
+                onError={(event) => {
+                  event.currentTarget.style.display = 'none';
 
-            <img
-              src="/logo-pmr-smanel.png"
-              alt="Logo PMR SMANEL"
-              className="brand-logo"
-              onError={(event) => {
-                event.currentTarget.style.display =
-                  'none';
+                  const fallback =
+                    event.currentTarget.nextElementSibling;
 
-                const fallback =
-                  event.currentTarget
-                    .nextElementSibling;
+                  if (fallback) {
+                    fallback.style.display = 'grid';
+                  }
+                }}
+              />
 
-                if (fallback) {
-                  fallback.style.display =
-                    'grid';
-                }
-              }}
-            />
-
-            <div
-              className="brand-logo-fallback"
-              style={{
-                display: 'none',
-              }}
-            >
-              PMR
+              <div
+                className="brand-logo-fallback"
+                style={{ display: 'none' }}
+                aria-hidden="true"
+              >
+                PMR
+              </div>
             </div>
 
-          </div>
-
-          <div className="brand-text">
-            <strong>
-              PMR SMANEL
-            </strong>
-
-            <span>
-              Absensi & Keuangan
-            </span>
-          </div>
+            <div className="brand-text">
+              <strong>PMR SMANEL</strong>
+              <span>Absensi & Keuangan</span>
+            </div>
+          </Link>
 
           <button
             type="button"
@@ -221,16 +245,15 @@ export default function Shell({
 
 
         <div className="sidebar-role">
-          <ShieldCheck size={16} />
-
-          {ROLE_LABEL[
-            session?.role
-          ] || session?.role}
-
+          <ShieldCheck size={15} />
+          <span>{roleLabel}</span>
         </div>
 
 
-        <nav className="sidebar-nav">
+        <nav
+          className="sidebar-nav sidebar-nav-compact"
+          aria-label="Navigasi utama"
+        >
 
           {mainItems.length > 0 && (
             <div className="sidebar-nav-group">
@@ -255,11 +278,8 @@ export default function Shell({
                         : ''
                     }`}
                   >
-                    <Icon size={18} />
-
-                    <span>
-                      {label}
-                    </span>
+                    <Icon size={17} />
+                    <span>{label}</span>
                   </Link>
                 )
               )}
@@ -274,50 +294,28 @@ export default function Shell({
               <button
                 type="button"
                 className={`sidebar-group-toggle ${
-                  isFinancePath
-                    ? 'current'
-                    : ''
+                  isFinancePath ? 'current' : ''
                 }`}
-                onClick={() =>
-                  setFinanceOpen(
-                    (value) => !value
-                  )
-                }
-                aria-expanded={
-                  financeOpen
-                }
+                onClick={toggleFinance}
+                aria-expanded={financeOpen}
               >
                 <span>
-                  KEUANGAN
+                  <Wallet size={15} />
+                  <span>KEUANGAN</span>
                 </span>
 
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                <ChevronDown
+                  size={15}
                   className={
-                    financeOpen
-                      ? 'rotated'
-                      : ''
+                    financeOpen ? 'rotated' : ''
                   }
-                  aria-hidden="true"
-                >
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-
+                />
               </button>
 
 
               <div
                 className={`sidebar-subnav ${
-                  financeOpen
-                    ? 'open'
-                    : ''
+                  financeOpen ? 'open' : ''
                 }`}
               >
                 {financeItems.map(
@@ -336,11 +334,8 @@ export default function Shell({
                           : ''
                       }`}
                     >
-                      <Icon size={17} />
-
-                      <span>
-                        {label}
-                      </span>
+                      <Icon size={16} />
+                      <span>{label}</span>
                     </Link>
                   )
                 )}
@@ -351,28 +346,46 @@ export default function Shell({
 
 
           {session?.role === 'ADMIN' && (
-            <div className="sidebar-nav-group system-group">
+            <div className="sidebar-nav-group">
 
-              <div className="sidebar-nav-label">
-                SISTEM
-              </div>
+              <button
+                type="button"
+                className={`sidebar-group-toggle ${
+                  isSystemPath ? 'current' : ''
+                }`}
+                onClick={toggleSystem}
+                aria-expanded={systemOpen}
+              >
+                <span>
+                  <Settings size={15} />
+                  <span>SISTEM</span>
+                </span>
 
-              <Link
-                to="/pengaturan"
-                onClick={closeSidebar}
-                className={`nav-item ${
-                  location.pathname ===
-                  '/pengaturan'
-                    ? 'active'
-                    : ''
+                <ChevronDown
+                  size={15}
+                  className={
+                    systemOpen ? 'rotated' : ''
+                  }
+                />
+              </button>
+
+
+              <div
+                className={`sidebar-subnav system-subnav ${
+                  systemOpen ? 'open' : ''
                 }`}
               >
-                <Settings size={18} />
-
-                <span>
-                  Pengaturan
-                </span>
-              </Link>
+                <Link
+                  to="/pengaturan"
+                  onClick={closeSidebar}
+                  className={`nav-item ${
+                    isSystemPath ? 'active' : ''
+                  }`}
+                >
+                  <Settings size={16} />
+                  <span>Pengaturan</span>
+                </Link>
+              </div>
 
             </div>
           )}
@@ -380,19 +393,37 @@ export default function Shell({
         </nav>
 
 
-        <button
-          type="button"
-          className="logout-btn"
-          onClick={logout}
-        >
-          <LogOut size={17} />
-          Keluar
-        </button>
+        <div className="sidebar-footer">
+
+          <div className="sidebar-account">
+            <div className="sidebar-account-avatar">
+              <UserRound size={15} />
+            </div>
+
+            <div className="sidebar-account-copy">
+              <strong>
+                {session?.username || roleLabel}
+              </strong>
+              <span>{roleLabel}</span>
+            </div>
+          </div>
+
+
+          <button
+            type="button"
+            className="logout-btn"
+            onClick={logout}
+          >
+            <LogOut size={16} />
+            <span>Keluar</span>
+          </button>
+
+        </div>
 
       </aside>
 
 
-      {open && (
+      {mobileOpen && (
         <div
           className="sidebar-backdrop"
           onClick={closeSidebar}
@@ -408,9 +439,7 @@ export default function Shell({
           <button
             type="button"
             className="icon-btn mobile-menu"
-            onClick={() =>
-              setOpen(true)
-            }
+            onClick={() => setMobileOpen(true)}
             aria-label="Buka menu"
           >
             <Menu />
@@ -430,11 +459,9 @@ export default function Shell({
 
           <div className="user-chip">
             <UserRound size={17} />
-
-            {session?.username ||
-              ROLE_LABEL[
-                session?.role
-              ]}
+            <span>
+              {session?.username || roleLabel}
+            </span>
           </div>
 
         </header>
